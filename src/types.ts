@@ -23,5 +23,6 @@ export interface EmergencyProfile {
   medications: string[];
   medicalHistory: string;
   emergencyContacts: EmergencyContact[];
+  isPublic?: boolean;
   updatedAt: string;
 }

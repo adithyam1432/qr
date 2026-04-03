@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { doc, getDoc } from 'firebase/firestore';
+import { doc, onSnapshot } from 'firebase/firestore';
 import { QRCodeSVG } from 'qrcode.react';
 import { useAuth } from '../App';
 import { db, auth } from '../firebase';
 import { UserProfile, EmergencyProfile } from '../types';
-import { Shield, QrCode, User, Heart, PhoneCall, LogOut, Edit3, Share2, Download, Settings, MapPin, Copy, Check } from 'lucide-react';
-import { motion } from 'motion/react';
+import { Shield, QrCode, User, Heart, PhoneCall, LogOut, Edit3, Share2, Download, Settings, MapPin, Copy, Check, AlertCircle } from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
 
 export default function Dashboard() {
   const { user, isAdmin } = useAuth();
@@ -16,6 +16,25 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [copied, setCopied] = useState(false);
 
+  const calculateCompleteness = () => {
+    if (!userProfile || !emergencyProfile) return 0;
+    let score = 0;
+    const total = 8;
+    
+    if (userProfile.fullName) score++;
+    if (userProfile.phone) score++;
+    if (userProfile.address) score++;
+    if (userProfile.insuranceProvider) score++;
+    if (emergencyProfile.bloodType && emergencyProfile.bloodType !== 'Unknown') score++;
+    if (emergencyProfile.allergies.length > 0) score++;
+    if (emergencyProfile.medications.length > 0) score++;
+    if (emergencyProfile.emergencyContacts.length > 0) score++;
+    
+    return Math.round((score / total) * 100);
+  };
+
+  const completeness = calculateCompleteness();
+
   const handleCopyLink = () => {
     if (!emergencyUrl) return;
     navigator.clipboard.writeText(emergencyUrl);
@@ -24,21 +43,21 @@ export default function Dashboard() {
   };
 
   useEffect(() => {
-    const fetchData = async () => {
-      if (!user) return;
-      try {
-        const userDoc = await getDoc(doc(db, 'users', user.uid));
-        const emergencyDoc = await getDoc(doc(db, 'emergency_profiles', user.uid));
-        
-        if (userDoc.exists()) setUserProfile(userDoc.data() as UserProfile);
-        if (emergencyDoc.exists()) setEmergencyProfile(emergencyDoc.data() as EmergencyProfile);
-      } catch (error) {
-        console.error('Error fetching data:', error);
-      } finally {
-        setLoading(false);
-      }
+    if (!user) return;
+
+    const unsubUser = onSnapshot(doc(db, 'users', user.uid), (doc) => {
+      if (doc.exists()) setUserProfile(doc.data() as UserProfile);
+      setLoading(false);
+    });
+
+    const unsubEmergency = onSnapshot(doc(db, 'emergency_profiles', user.uid), (doc) => {
+      if (doc.exists()) setEmergencyProfile(doc.data() as EmergencyProfile);
+    });
+
+    return () => {
+      unsubUser();
+      unsubEmergency();
     };
-    fetchData();
   }, [user]);
 
   const handleLogout = async () => {
@@ -81,7 +100,38 @@ export default function Dashboard() {
         </div>
       </header>
 
-      <main className="flex-1 max-w-7xl mx-auto w-full px-6 py-10 grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <main className="flex-1 max-w-7xl mx-auto w-full px-6 py-10">
+        {completeness < 100 && (
+          <motion.div 
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-8 bg-amber-50 border border-amber-100 rounded-2xl p-6 flex flex-col md:flex-row items-center justify-between gap-6"
+          >
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 bg-amber-100 rounded-full flex items-center justify-center text-amber-600 shrink-0">
+                <AlertCircle className="w-6 h-6" />
+              </div>
+              <div>
+                <h3 className="font-bold text-amber-900">Complete Your Profile</h3>
+                <p className="text-sm text-amber-700">Your emergency profile is {completeness}% complete. Add missing info to help first responders.</p>
+              </div>
+            </div>
+            <div className="w-full md:w-64">
+              <div className="h-2 bg-amber-200 rounded-full overflow-hidden">
+                <motion.div 
+                  initial={{ width: 0 }}
+                  animate={{ width: `${completeness}%` }}
+                  className="h-full bg-amber-500"
+                />
+              </div>
+              <Link to="/profile" className="mt-3 text-xs font-bold text-amber-600 hover:text-amber-700 uppercase tracking-widest block text-right">
+                Update Now →
+              </Link>
+            </div>
+          </motion.div>
+        )}
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Left Column: QR Code */}
         <motion.div 
           initial={{ opacity: 0, x: -20 }}
@@ -292,9 +342,10 @@ export default function Dashboard() {
             </div>
           </div>
         </motion.div>
-      </main>
-    </div>
-  );
+      </div>
+    </main>
+  </div>
+);
 }
 
 function ArrowRight({ className }: { className?: string }) {

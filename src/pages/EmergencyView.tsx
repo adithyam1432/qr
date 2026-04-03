@@ -1,17 +1,19 @@
 import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { doc, getDoc } from 'firebase/firestore';
 import { db, handleFirestoreError, OperationType } from '../firebase';
 import { UserProfile, EmergencyProfile } from '../types';
-import { Shield, Heart, PhoneCall, AlertTriangle, Activity, User, Info, MapPin } from 'lucide-react';
+import { Shield, Heart, PhoneCall, AlertTriangle, Activity, User, Info, MapPin, Lock, ArrowLeft } from 'lucide-react';
 import { motion } from 'motion/react';
 
 export default function EmergencyView() {
   const { uid } = useParams<{ uid: string }>();
+  const navigate = useNavigate();
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [emergencyProfile, setEmergencyProfile] = useState<EmergencyProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isPrivate, setIsPrivate] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -22,7 +24,12 @@ export default function EmergencyView() {
         
         if (userDoc.exists()) setUserProfile(userDoc.data() as UserProfile);
         if (emergencyDoc.exists()) {
-          setEmergencyProfile(emergencyDoc.data() as EmergencyProfile);
+          const data = emergencyDoc.data() as EmergencyProfile;
+          if (data.isPublic === false) {
+            setIsPrivate(true);
+          } else {
+            setEmergencyProfile(data);
+          }
         } else {
           setError('Emergency profile not found. The user may not have completed their profile setup.');
         }
@@ -41,6 +48,24 @@ export default function EmergencyView() {
       <div className="min-h-screen bg-red-600 flex flex-col items-center justify-center p-6 text-white text-center">
         <div className="w-16 h-16 border-4 border-white border-t-transparent rounded-full animate-spin mb-4"></div>
         <h1 className="text-2xl font-bold">Loading Emergency Profile...</h1>
+      </div>
+    );
+  }
+
+  if (isPrivate) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-6 text-center">
+        <div className="w-24 h-24 bg-gray-200 rounded-full flex items-center justify-center mb-6 text-gray-400">
+          <Lock className="w-12 h-12" />
+        </div>
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">Private Profile</h1>
+        <p className="text-gray-500 max-w-md mb-8">This user has restricted access to their emergency profile. Only authorized personnel can view this information.</p>
+        <button 
+          onClick={() => navigate('/')}
+          className="px-8 py-3 bg-gray-900 text-white rounded-2xl font-bold hover:bg-gray-800 transition-all flex items-center gap-2"
+        >
+          <ArrowLeft className="w-5 h-5" /> Back to Home
+        </button>
       </div>
     );
   }

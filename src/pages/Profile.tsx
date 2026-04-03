@@ -4,7 +4,7 @@ import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { useAuth } from '../App';
 import { db, handleFirestoreError, OperationType } from '../firebase';
 import { UserProfile, EmergencyProfile, EmergencyContact } from '../types';
-import { Shield, ArrowLeft, Save, Plus, Trash2, Heart, User, PhoneCall, Activity } from 'lucide-react';
+import { Shield, ArrowLeft, Save, Plus, Trash2, Heart, User, PhoneCall, Activity, Globe, Lock, AlertCircle } from 'lucide-react';
 import { motion } from 'motion/react';
 
 export default function Profile() {
@@ -26,9 +26,26 @@ export default function Profile() {
   const [medications, setMedications] = useState<string[]>([]);
   const [newMedication, setNewMedication] = useState('');
   const [medicalHistory, setMedicalHistory] = useState('');
+  const [isPublic, setIsPublic] = useState(true);
   const [emergencyContacts, setEmergencyContacts] = useState<EmergencyContact[]>([
     { name: '', relationship: '', phone: '' }
   ]);
+
+  const calculateCompleteness = () => {
+    let score = 0;
+    const total = 8;
+    if (fullName) score++;
+    if (phone) score++;
+    if (address) score++;
+    if (insuranceProvider) score++;
+    if (bloodType && bloodType !== 'Unknown') score++;
+    if (allergies.length > 0) score++;
+    if (medications.length > 0) score++;
+    if (emergencyContacts.some(c => c.name && c.phone)) score++;
+    return Math.round((score / total) * 100);
+  };
+
+  const completeness = calculateCompleteness();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -54,6 +71,7 @@ export default function Profile() {
           setAllergies(data.allergies || []);
           setMedications(data.medications || []);
           setMedicalHistory(data.medicalHistory || '');
+          setIsPublic(data.isPublic !== false);
           setEmergencyContacts(data.emergencyContacts || [{ name: '', relationship: '', phone: '' }]);
         }
       } catch (error) {
@@ -92,6 +110,7 @@ export default function Profile() {
         allergies,
         medications,
         medicalHistory,
+        isPublic,
         emergencyContacts: emergencyContacts.filter(c => c.name && c.phone),
         updatedAt: serverTimestamp(),
       };
@@ -139,10 +158,93 @@ export default function Profile() {
       </header>
 
       <main className="flex-1 max-w-4xl mx-auto w-full px-6 py-10">
-        <form id="profile-form" onSubmit={handleSave} className="space-y-8">
+        <div className="mb-10">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900">Profile Setup</h1>
+              <p className="text-gray-500">Complete your medical profile to ensure best care.</p>
+            </div>
+            <div className="text-right">
+              <div className="text-2xl font-bold text-red-600">{completeness}%</div>
+              <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Complete</div>
+            </div>
+          </div>
+          <div className="h-3 bg-gray-200 rounded-full overflow-hidden shadow-inner">
+            <motion.div 
+              initial={{ width: 0 }}
+              animate={{ width: `${completeness}%` }}
+              className={`h-full transition-all duration-500 ${completeness === 100 ? 'bg-green-500' : 'bg-red-600'}`}
+            />
+          </div>
+          {completeness < 100 && (
+            <div className="mt-4 flex items-center gap-2 text-amber-600 bg-amber-50 px-4 py-2 rounded-lg border border-amber-100">
+              <AlertCircle className="w-4 h-4" />
+              <span className="text-xs font-medium">Missing: {completeness < 20 ? 'Basic Info' : completeness < 50 ? 'Medical Details' : 'Emergency Contacts'}</span>
+            </div>
+          )}
+        </div>
+
+        <motion.form 
+          id="profile-form" 
+          onSubmit={handleSave} 
+          className="space-y-8"
+          initial="hidden"
+          animate="visible"
+          variants={{
+            hidden: { opacity: 0 },
+            visible: {
+              opacity: 1,
+              transition: {
+                staggerChildren: 0.1
+              }
+            }
+          }}
+        >
           
-          {/* Personal Info */}
-          <section className="bg-white rounded-3xl shadow-sm border border-gray-100 p-8">
+          <motion.section 
+            variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }}
+            className="bg-white rounded-3xl shadow-sm border border-gray-100 p-8"
+          >
+            <h2 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
+              <Globe className="w-5 h-5 text-red-600" /> Privacy & Sharing
+            </h2>
+            <div className="flex flex-col md:flex-row gap-6">
+              <button 
+                type="button"
+                onClick={() => setIsPublic(true)}
+                className={`flex-1 p-6 rounded-2xl border-2 transition-all text-left ${isPublic ? 'border-red-600 bg-red-50' : 'border-gray-100 bg-white hover:border-gray-200'}`}
+              >
+                <div className="flex items-center justify-between mb-4">
+                  <div className={`p-3 rounded-xl ${isPublic ? 'bg-red-600 text-white' : 'bg-gray-100 text-gray-400'}`}>
+                    <Globe className="w-6 h-6" />
+                  </div>
+                  {isPublic && <div className="w-4 h-4 bg-red-600 rounded-full border-2 border-white shadow-sm" />}
+                </div>
+                <h3 className={`font-bold ${isPublic ? 'text-red-900' : 'text-gray-900'}`}>Public Access</h3>
+                <p className={`text-sm mt-1 ${isPublic ? 'text-red-700' : 'text-gray-500'}`}>Anyone with your QR code can view your emergency profile.</p>
+              </button>
+
+              <button 
+                type="button"
+                onClick={() => setIsPublic(false)}
+                className={`flex-1 p-6 rounded-2xl border-2 transition-all text-left ${!isPublic ? 'border-gray-900 bg-gray-50' : 'border-gray-100 bg-white hover:border-gray-200'}`}
+              >
+                <div className="flex items-center justify-between mb-4">
+                  <div className={`p-3 rounded-xl ${!isPublic ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-400'}`}>
+                    <Lock className="w-6 h-6" />
+                  </div>
+                  {!isPublic && <div className="w-4 h-4 bg-gray-900 rounded-full border-2 border-white shadow-sm" />}
+                </div>
+                <h3 className={`font-bold ${!isPublic ? 'text-gray-900' : 'text-gray-900'}`}>Private Access</h3>
+                <p className={`text-sm mt-1 ${!isPublic ? 'text-gray-700' : 'text-gray-500'}`}>Only you and authorized admins can view your profile.</p>
+              </button>
+            </div>
+          </motion.section>
+          
+          <motion.section 
+            variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }}
+            className="bg-white rounded-3xl shadow-sm border border-gray-100 p-8"
+          >
             <h2 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
               <User className="w-5 h-5 text-red-600" /> Personal Information
             </h2>
@@ -193,10 +295,12 @@ export default function Profile() {
                 />
               </div>
             </div>
-          </section>
+          </motion.section>
 
-          {/* Medical Info */}
-          <section className="bg-white rounded-3xl shadow-sm border border-gray-100 p-8">
+          <motion.section 
+            variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }}
+            className="bg-white rounded-3xl shadow-sm border border-gray-100 p-8"
+          >
             <h2 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
               <Heart className="w-5 h-5 text-red-600" /> Medical Information
             </h2>
@@ -281,10 +385,12 @@ export default function Profile() {
                 />
               </div>
             </div>
-          </section>
+          </motion.section>
 
-          {/* Emergency Contacts */}
-          <section className="bg-white rounded-3xl shadow-sm border border-gray-100 p-8">
+          <motion.section 
+            variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }}
+            className="bg-white rounded-3xl shadow-sm border border-gray-100 p-8"
+          >
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
                 <PhoneCall className="w-5 h-5 text-red-600" /> Emergency Contacts
@@ -344,8 +450,8 @@ export default function Profile() {
                 </div>
               ))}
             </div>
-          </section>
-        </form>
+          </motion.section>
+        </motion.form>
       </main>
     </div>
   );
