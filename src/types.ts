@@ -22,6 +22,7 @@ export interface EmergencyProfile {
   allergies: string[];
   medications: string[];
   medicalHistory: string;
+  firstAidInstructions?: string;
   emergencyContacts: EmergencyContact[];
   isPublic?: boolean;
   updatedAt: string;

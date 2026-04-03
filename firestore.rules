@@ -26,6 +26,7 @@ service cloud.firestore {
     //   - allergies: list (optional)
     //   - medications: list (optional)
     //   - medicalHistory: string (optional)
+    //   - firstAidInstructions: string (optional)
     //   - emergencyContacts: list (required, list of objects)
     //   - updatedAt: timestamp (required)
     //
@@ -75,6 +76,7 @@ service cloud.firestore {
              (!('allergies' in data) || data.allergies is list) &&
              (!('medications' in data) || data.medications is list) &&
              (!('medicalHistory' in data) || data.medicalHistory is string && data.medicalHistory.size() < 1000) &&
+             (!('firstAidInstructions' in data) || data.firstAidInstructions is string && data.firstAidInstructions.size() < 1000) &&
              data.emergencyContacts is list && data.emergencyContacts.size() > 0;
     }
 

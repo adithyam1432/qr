@@ -27,6 +27,7 @@
         "allergies": { "type": "array", "items": { "type": "string" } },
         "medications": { "type": "array", "items": { "type": "string" } },
         "medicalHistory": { "type": "string" },
+        "firstAidInstructions": { "type": "string" },
         "emergencyContacts": {
           "type": "array",
           "items": {
