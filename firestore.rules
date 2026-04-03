@@ -38,6 +38,12 @@ service cloud.firestore {
       return request.auth != null;
     }
 
+    function isAdmin() {
+      return isAuthenticated() && 
+             (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin' || 
+              (request.auth.token.email == "aditya587644@gmail.com" && request.auth.token.email_verified == true));
+    }
+
     function isOwner(userId) {
       return isAuthenticated() && request.auth.uid == userId;
     }
@@ -76,18 +82,18 @@ service cloud.firestore {
     // Rules
     // ===============================================================
     match /users/{userId} {
-      allow read: if isOwner(userId);
+      allow read: if isOwner(userId) || isAdmin();
       allow create: if isOwner(userId) && isValidUser(request.resource.data);
-      allow update: if isOwner(userId) && isValidUser(request.resource.data);
-      allow delete: if false; // Users cannot delete their profile for now
+      allow update: if (isOwner(userId) || isAdmin()) && isValidUser(request.resource.data);
+      allow delete: if isAdmin();
     }
 
     match /emergency_profiles/{userId} {
       // Emergency profiles are publicly readable if the ID is known (via QR code)
       allow read: if true; 
       allow create: if isOwner(userId) && isValidEmergencyProfile(request.resource.data);
-      allow update: if isOwner(userId) && isValidEmergencyProfile(request.resource.data);
-      allow delete: if false;
+      allow update: if (isOwner(userId) || isAdmin()) && isValidEmergencyProfile(request.resource.data);
+      allow delete: if isAdmin();
     }
   }
 }

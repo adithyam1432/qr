@@ -7,13 +7,15 @@ import Dashboard from './pages/Dashboard';
 import Login from './pages/Login';
 import EmergencyView from './pages/EmergencyView';
 import Profile from './pages/Profile';
+import AdminDashboard from './pages/AdminDashboard';
 
 interface AuthContextType {
   user: User | null;
   loading: boolean;
+  isAdmin: boolean;
 }
 
-const AuthContext = createContext<AuthContextType>({ user: null, loading: true });
+const AuthContext = createContext<AuthContextType>({ user: null, loading: true, isAdmin: false });
 
 export const useAuth = () => useContext(AuthContext);
 
@@ -23,20 +25,35 @@ function PrivateRoute({ children }: { children: React.ReactNode }) {
   return user ? <>{children}</> : <Navigate to="/login" />;
 }
 
+function AdminRoute({ children }: { children: React.ReactNode }) {
+  const { user, loading, isAdmin } = useAuth();
+  if (loading) return <div className="flex items-center justify-center h-screen">Verifying Permissions...</div>;
+  return user && isAdmin ? <>{children}</> : <Navigate to="/dashboard" />;
+}
+
 export default function App() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
       setUser(user);
+      if (user) {
+        // Check for admin status
+        const idTokenResult = await user.getIdTokenResult();
+        const isAdminEmail = user.email === "aditya587644@gmail.com";
+        setIsAdmin(isAdminEmail);
+      } else {
+        setIsAdmin(false);
+      }
       setLoading(false);
     });
     return unsubscribe;
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, loading }}>
+    <AuthContext.Provider value={{ user, loading, isAdmin }}>
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Home />} />
@@ -56,6 +73,14 @@ export default function App() {
               <PrivateRoute>
                 <Profile />
               </PrivateRoute>
+            }
+          />
+          <Route
+            path="/admin"
+            element={
+              <AdminRoute>
+                <AdminDashboard />
+              </AdminRoute>
             }
           />
         </Routes>

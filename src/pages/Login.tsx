@@ -25,7 +25,7 @@ export default function Login() {
       } else if (authError.code === 'auth/cancelled-by-user') {
         setError('Login was cancelled. Please try again.');
       } else {
-        setError('An unexpected error occurred during login. Please try again.');
+        setError(`Login failed: ${authError.code}. Please ensure Google Login is enabled in your Firebase Console and the current domain is authorized.`);
       }
     } finally {
       setIsLoggingIn(false);

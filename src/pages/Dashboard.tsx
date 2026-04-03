@@ -5,11 +5,11 @@ import { QRCodeSVG } from 'qrcode.react';
 import { useAuth } from '../App';
 import { db, auth } from '../firebase';
 import { UserProfile, EmergencyProfile } from '../types';
-import { Shield, QrCode, User, Heart, PhoneCall, LogOut, Edit3, Share2, Download } from 'lucide-react';
+import { Shield, QrCode, User, Heart, PhoneCall, LogOut, Edit3, Share2, Download, Settings } from 'lucide-react';
 import { motion } from 'motion/react';
 
 export default function Dashboard() {
-  const { user } = useAuth();
+  const { user, isAdmin } = useAuth();
   const navigate = useNavigate();
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [emergencyProfile, setEmergencyProfile] = useState<EmergencyProfile | null>(null);
@@ -51,6 +51,11 @@ export default function Dashboard() {
           <span className="text-xl font-bold tracking-tight text-gray-900">MediQR</span>
         </div>
         <div className="flex items-center gap-4">
+          {isAdmin && (
+            <Link to="/admin" className="p-2 text-gray-500 hover:text-red-600 transition-colors" title="Admin Panel">
+              <Settings className="w-5 h-5" />
+            </Link>
+          )}
           <button 
             onClick={handleLogout}
             className="p-2 text-gray-500 hover:text-red-600 transition-colors"
