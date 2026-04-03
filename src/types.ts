@@ -20,6 +20,10 @@ export interface EmergencyProfile {
   uid: string;
   fullName: string;
   email: string;
+  phone?: string;
+  address?: string;
+  insuranceProvider?: string;
+  insurancePolicyNumber?: string;
   bloodType: 'A+' | 'A-' | 'B+' | 'B-' | 'AB+' | 'AB-' | 'O+' | 'O-' | 'Unknown';
   allergies: string[];
   medications: string[];

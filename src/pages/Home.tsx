@@ -40,7 +40,61 @@ export default function Home() {
       </nav>
 
       {/* Hero Section */}
-      <section className="relative pt-40 pb-32 px-6 overflow-hidden">
+      <section className="relative pt-40 pb-32 px-4 overflow-hidden">
+        {/* Heartbeat Animation */}
+        <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden flex items-center">
+          <div className="w-full h-64 relative">
+            {/* ECG Grid Background */}
+            <div 
+              className="absolute inset-0 opacity-[0.05] dark:opacity-[0.02]"
+              style={{
+                backgroundImage: `
+                  linear-gradient(to right, #ef4444 1px, transparent 1px),
+                  linear-gradient(to bottom, #ef4444 1px, transparent 1px)
+                `,
+                backgroundSize: '40px 40px'
+              }}
+            />
+            
+            {/* The Heartbeat Line */}
+            <svg 
+              viewBox="0 0 1000 100" 
+              preserveAspectRatio="none" 
+              className="w-full h-full stroke-red-600 dark:stroke-red-500 fill-none stroke-[5]"
+              style={{ filter: 'drop-shadow(0 0 20px rgba(239,68,68,1))' }}
+            >
+              <defs>
+                <linearGradient id="heartbeat-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stopColor="white" stopOpacity="0" />
+                  <stop offset="70%" stopColor="white" stopOpacity="0.05" />
+                  <stop offset="98%" stopColor="white" stopOpacity="1" />
+                  <stop offset="100%" stopColor="white" stopOpacity="0" />
+                </linearGradient>
+                <mask id="heartbeat-mask">
+                  <motion.rect
+                    x="-800"
+                    y="0"
+                    width="800"
+                    height="100"
+                    fill="url(#heartbeat-gradient)"
+                    animate={{ x: [ -800, 1800 ] }}
+                    transition={{
+                      duration: 6,
+                      repeat: Infinity,
+                      ease: "linear"
+                    }}
+                  />
+                </mask>
+              </defs>
+              
+              <path
+                d="M0,50 L150,50 L160,10 L170,90 L180,50 L350,50 L360,10 L370,90 L380,50 L550,50 L560,10 L570,90 L580,50 L750,50 L760,10 L770,90 L780,50 L950,50 L960,10 L970,90 L980,50 L1000,50"
+                mask="url(#heartbeat-mask)"
+              />
+            </svg>
+          </div>
+        </div>
+
         {/* Background Accents */}
         <div className="absolute top-0 right-0 -translate-y-1/2 translate-x-1/4 w-[800px] h-[800px] bg-red-50 dark:bg-red-900/10 rounded-full blur-[120px] opacity-50 -z-10" />
         <div className="absolute bottom-0 left-0 translate-y-1/2 -translate-x-1/4 w-[600px] h-[600px] bg-blue-50 dark:bg-blue-900/10 rounded-full blur-[100px] opacity-30 -z-10" />

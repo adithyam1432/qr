@@ -206,7 +206,10 @@ export default function Dashboard() {
             <div className="bg-white dark:bg-gray-900 rounded-[40px] shadow-sm border border-gray-100 dark:border-gray-800 p-10 text-center relative overflow-hidden transition-colors">
               <div className="absolute top-0 left-0 w-full h-2 bg-red-600" />
               <h2 className="text-2xl font-black text-gray-900 dark:text-white mb-8 tracking-tighter uppercase">Your Emergency QR</h2>
-              <div className="bg-gray-50 dark:bg-gray-800 p-8 rounded-[32px] border border-gray-100 dark:border-gray-700 inline-block mb-8 shadow-inner group cursor-pointer">
+              <div 
+                onClick={() => setShowQRModal(true)}
+                className="bg-gray-50 dark:bg-gray-800 p-8 rounded-[32px] border border-gray-100 dark:border-gray-700 inline-block mb-8 shadow-inner group cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-750 transition-all"
+              >
                 {emergencyUrl ? (
                   <QRCodeSVG 
                     value={emergencyUrl} 
@@ -451,80 +454,131 @@ export default function Dashboard() {
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              className="relative bg-white dark:bg-gray-900 rounded-[48px] shadow-2xl w-full max-w-xl overflow-hidden border border-gray-100 dark:border-gray-800 transition-colors"
+              className="relative bg-white dark:bg-gray-900 rounded-[48px] shadow-2xl w-full max-w-2xl overflow-hidden border border-gray-100 dark:border-gray-800 transition-colors"
             >
-              <div className="p-8 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between">
-                <h3 className="text-2xl font-black text-gray-900 dark:text-white tracking-tighter uppercase">Download QR Code</h3>
+              <div className="p-8 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between bg-gray-50/50 dark:bg-gray-800/50">
+                <div>
+                  <h3 className="text-2xl font-black text-gray-900 dark:text-white tracking-tighter uppercase">Export QR Code</h3>
+                  <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mt-1">Choose your preferred format and size</p>
+                </div>
                 <button onClick={() => setShowQRModal(false)} className="p-3 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-2xl transition-all">
                   <X className="w-6 h-6 text-gray-400" />
                 </button>
               </div>
 
-              <div className="p-10 flex flex-col items-center">
-                <div className="bg-gray-50 dark:bg-gray-800 p-10 rounded-[40px] border border-gray-100 dark:border-gray-700 shadow-inner mb-10 group cursor-pointer">
-                  {qrFormat === 'png' ? (
-                    <QRCodeCanvas
-                      id="qr-canvas"
-                      value={emergencyUrl}
-                      size={qrSize}
-                      level="H"
-                      includeMargin={true}
-                      style={{ width: '240px', height: '240px' }}
-                      className="group-hover:scale-105 transition-transform"
-                    />
-                  ) : (
-                    <QRCodeSVG
-                      id="qr-svg"
-                      value={emergencyUrl}
-                      size={qrSize}
-                      level="H"
-                      includeMargin={true}
-                      style={{ width: '240px', height: '240px' }}
-                      className="group-hover:scale-105 transition-transform"
-                    />
-                  )}
+              <div className="p-8 md:p-12 grid grid-cols-1 md:grid-cols-2 gap-12">
+                <div className="flex flex-col items-center justify-center">
+                  <div className="bg-white dark:bg-gray-800 p-8 rounded-[40px] border border-gray-100 dark:border-gray-700 shadow-2xl shadow-gray-200/50 dark:shadow-none mb-8 group relative">
+                    <div className="absolute inset-0 bg-red-600/5 blur-3xl rounded-full -z-10 animate-pulse" />
+                    {qrFormat === 'png' ? (
+                      <QRCodeCanvas
+                        id="qr-canvas"
+                        value={emergencyUrl}
+                        size={qrSize}
+                        level="H"
+                        includeMargin={true}
+                        style={{ width: '240px', height: '240px' }}
+                        className="group-hover:scale-105 transition-transform"
+                      />
+                    ) : (
+                      <QRCodeSVG
+                        id="qr-svg"
+                        value={emergencyUrl}
+                        size={qrSize}
+                        level="H"
+                        includeMargin={true}
+                        style={{ width: '240px', height: '240px' }}
+                        className="group-hover:scale-105 transition-transform"
+                      />
+                    )}
+                  </div>
+                  <div className="flex items-center gap-2 px-4 py-2 bg-gray-50 dark:bg-gray-800 rounded-full border border-gray-100 dark:border-gray-700">
+                    <div className="w-2 h-2 rounded-full bg-green-500" />
+                    <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">High Resolution Ready</span>
+                  </div>
                 </div>
 
-                <div className="w-full space-y-8">
-                  <div className="grid grid-cols-2 gap-6">
-                    <div className="space-y-3">
-                      <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest block">Format</label>
-                      <div className="flex bg-gray-100 dark:bg-gray-800 p-1.5 rounded-2xl">
-                        <button 
-                          onClick={() => setQrFormat('png')}
-                          className={`flex-1 py-3 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-2 uppercase tracking-widest ${qrFormat === 'png' ? 'bg-white dark:bg-gray-700 shadow-sm text-red-600' : 'text-gray-400'}`}
-                        >
-                          <ImageIcon className="w-4 h-4" /> PNG
-                        </button>
-                        <button 
-                          onClick={() => setQrFormat('svg')}
-                          className={`flex-1 py-3 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-2 uppercase tracking-widest ${qrFormat === 'svg' ? 'bg-white dark:bg-gray-700 shadow-sm text-red-600' : 'text-gray-400'}`}
-                        >
-                          <FileText className="w-4 h-4" /> SVG
-                        </button>
-                      </div>
-                    </div>
-                    <div className="space-y-3">
-                      <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest block">Size</label>
-                      <select 
-                        value={qrSize}
-                        onChange={(e) => setQrSize(Number(e.target.value))}
-                        className="w-full py-4 px-5 bg-gray-100 dark:bg-gray-800 rounded-2xl text-xs font-black text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-red-500 uppercase tracking-widest border-none"
+                <div className="space-y-8">
+                  <div className="space-y-4">
+                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest block">File Format</label>
+                    <div className="grid grid-cols-2 gap-3 p-1.5 bg-gray-100 dark:bg-gray-800 rounded-2xl">
+                      <button 
+                        onClick={() => setQrFormat('png')}
+                        className={`py-3 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-2 uppercase tracking-widest ${qrFormat === 'png' ? 'bg-white dark:bg-gray-700 shadow-sm text-red-600' : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300'}`}
                       >
-                        <option value={256}>Small (256px)</option>
-                        <option value={512}>Medium (512px)</option>
-                        <option value={1024}>Large (1024px)</option>
-                      </select>
+                        <ImageIcon className="w-4 h-4" /> PNG
+                      </button>
+                      <button 
+                        onClick={() => setQrFormat('svg')}
+                        className={`py-3 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-2 uppercase tracking-widest ${qrFormat === 'svg' ? 'bg-white dark:bg-gray-700 shadow-sm text-red-600' : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300'}`}
+                      >
+                        <FileText className="w-4 h-4" /> SVG
+                      </button>
                     </div>
                   </div>
 
-                  <button 
-                    onClick={downloadQR}
-                    className="w-full py-6 bg-red-600 text-white rounded-[24px] font-black hover:bg-red-700 transition-all shadow-2xl shadow-red-100 dark:shadow-none flex items-center justify-center gap-3 active:scale-95 uppercase tracking-widest text-lg"
-                  >
-                    <Download className="w-6 h-6" /> Download {qrFormat.toUpperCase()}
-                  </button>
+                  <div className="space-y-4">
+                    <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest block">Resolution</label>
+                    <div className="grid grid-cols-2 gap-3">
+                      {[256, 512, 1024, 2048].map((size) => (
+                        <button
+                          key={size}
+                          onClick={() => setQrSize(size)}
+                          className={`py-4 rounded-2xl text-xs font-black transition-all border-2 uppercase tracking-widest ${qrSize === size ? 'bg-red-50 dark:bg-red-900/20 border-red-600 text-red-600' : 'bg-white dark:bg-gray-800 border-gray-100 dark:border-gray-700 text-gray-400 hover:border-gray-200 dark:hover:border-gray-600'}`}
+                        >
+                          {size}px
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="pt-4 space-y-3">
+                    <button 
+                      onClick={downloadQR}
+                      className="w-full py-5 bg-red-600 text-white rounded-2xl font-black hover:bg-red-700 transition-all shadow-xl shadow-red-100 dark:shadow-none flex items-center justify-center gap-3 active:scale-95 uppercase tracking-widest text-sm"
+                    >
+                      <Download className="w-5 h-5" /> Download {qrFormat.toUpperCase()}
+                    </button>
+                    <div className="grid grid-cols-2 gap-3">
+                      <button 
+                        onClick={() => {
+                          if (qrFormat === 'png') {
+                            const canvas = document.getElementById('qr-canvas') as HTMLCanvasElement;
+                            if (canvas) {
+                              canvas.toBlob((blob) => {
+                                if (blob) {
+                                  navigator.clipboard.write([
+                                    new ClipboardItem({ 'image/png': blob })
+                                  ]);
+                                  setCopied(true);
+                                  setTimeout(() => setCopied(false), 2000);
+                                }
+                              });
+                            }
+                          } else {
+                            handleCopyLink();
+                          }
+                        }}
+                        className="py-4 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white rounded-2xl font-black hover:bg-gray-100 dark:hover:bg-gray-700 transition-all flex items-center justify-center gap-2 active:scale-95 uppercase tracking-widest text-[10px] border border-gray-100 dark:border-gray-700"
+                      >
+                        {copied ? <Check className="w-4 h-4 text-green-600" /> : <Copy className="w-4 h-4 text-gray-400" />}
+                        {copied ? 'Copied!' : qrFormat === 'png' ? 'Copy Image' : 'Copy Link'}
+                      </button>
+                      <button 
+                        onClick={() => window.print()}
+                        className="py-4 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white rounded-2xl font-black hover:bg-gray-100 dark:hover:bg-gray-700 transition-all flex items-center justify-center gap-2 active:scale-95 uppercase tracking-widest text-[10px] border border-gray-100 dark:border-gray-700"
+                      >
+                        <Share2 className="w-4 h-4 text-gray-400" /> Print Code
+                      </button>
+                    </div>
+                  </div>
                 </div>
+              </div>
+              
+              <div className="p-6 bg-gray-50 dark:bg-gray-800/50 border-t border-gray-100 dark:border-gray-800">
+                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] text-center">
+                  Scan this code to instantly access your emergency profile
+                </p>
               </div>
             </motion.div>
           </div>

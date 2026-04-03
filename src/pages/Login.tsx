@@ -26,8 +26,8 @@ export default function Login() {
       
       if (authError.code === 'auth/popup-closed-by-user') {
         setError('The login window was closed before completion. Please try again.');
-      } else if (authError.code === 'auth/cancelled-by-user') {
-        setError('Login was cancelled. Please try again.');
+      } else if (authError.code === 'auth/network-request-failed') {
+        setError('Network request failed. Please ensure Google/Email auth is enabled in your Firebase Console and your domain is allowlisted.');
       } else {
         setError(`Login failed: ${authError.code}. Please ensure this provider is enabled in your Firebase Console.`);
       }
@@ -49,7 +49,17 @@ export default function Login() {
       navigate('/dashboard');
     } catch (err) {
       const authError = err as AuthError;
-      setError(authError.message);
+      console.error('Email auth failed:', authError.code, authError.message);
+      
+      if (authError.code === 'auth/network-request-failed') {
+        setError('Network request failed. Please ensure Email/Password auth is enabled in your Firebase Console.');
+      } else if (authError.code === 'auth/email-already-in-use') {
+        setError('This email is already registered. Please sign in instead.');
+      } else if (authError.code === 'auth/invalid-credential') {
+        setError('Invalid email or password. Please try again.');
+      } else {
+        setError(authError.message);
+      }
     } finally {
       setIsLoggingIn(false);
     }

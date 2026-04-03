@@ -276,10 +276,10 @@ export default function EmergencyView() {
                 <Shield className="w-3 h-3" /> Insurance
               </h4>
               <p className="font-bold text-gray-800 dark:text-gray-200">
-                {userProfile?.insuranceProvider ? `${userProfile.insuranceProvider}` : 'Restricted or Not provided'}
+                {userProfile?.insuranceProvider || emergencyProfile?.insuranceProvider ? `${userProfile?.insuranceProvider || emergencyProfile?.insuranceProvider}` : 'Not provided'}
               </p>
-              {userProfile?.insurancePolicyNumber && (
-                <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">Policy: {userProfile.insurancePolicyNumber}</p>
+              {(userProfile?.insurancePolicyNumber || emergencyProfile?.insurancePolicyNumber) && (
+                <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">Policy: {userProfile?.insurancePolicyNumber || emergencyProfile?.insurancePolicyNumber}</p>
               )}
             </div>
             <div>
@@ -287,7 +287,7 @@ export default function EmergencyView() {
                 <MapPin className="w-3 h-3" /> Home Address
               </h4>
               <p className="font-bold text-gray-800 dark:text-gray-200 leading-tight">
-                {userProfile?.address || 'Restricted or Not provided'}
+                {userProfile?.address || emergencyProfile?.address || 'Not provided'}
               </p>
             </div>
           </div>

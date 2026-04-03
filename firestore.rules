@@ -72,6 +72,12 @@ service cloud.firestore {
 
     function isValidEmergencyProfile(data) {
       return data.uid is string &&
+             data.fullName is string && data.fullName.size() > 0 && data.fullName.size() < 100 &&
+             isValidEmail(data.email) &&
+             (!('phone' in data) || data.phone is string && data.phone.size() < 20) &&
+             (!('address' in data) || data.address is string && data.address.size() < 200) &&
+             (!('insuranceProvider' in data) || data.insuranceProvider is string && data.insuranceProvider.size() < 100) &&
+             (!('insurancePolicyNumber' in data) || data.insurancePolicyNumber is string && data.insurancePolicyNumber.size() < 50) &&
              data.bloodType in ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-', 'Unknown'] &&
              (!('allergies' in data) || data.allergies is list) &&
              (!('medications' in data) || data.medications is list) &&
