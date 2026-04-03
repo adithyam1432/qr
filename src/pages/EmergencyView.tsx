@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { doc, getDoc } from 'firebase/firestore';
-import { db } from '../firebase';
+import { db, handleFirestoreError, OperationType } from '../firebase';
 import { UserProfile, EmergencyProfile } from '../types';
 import { Shield, Heart, PhoneCall, AlertTriangle, Activity, User, Info, MapPin } from 'lucide-react';
 import { motion } from 'motion/react';
@@ -24,11 +24,11 @@ export default function EmergencyView() {
         if (emergencyDoc.exists()) {
           setEmergencyProfile(emergencyDoc.data() as EmergencyProfile);
         } else {
-          setError('Emergency profile not found.');
+          setError('Emergency profile not found. The user may not have completed their profile setup.');
         }
       } catch (err) {
-        console.error('Error fetching emergency data:', err);
-        setError('Failed to load emergency information.');
+        handleFirestoreError(err, OperationType.GET, `emergency_profiles/${uid}`);
+        setError('Failed to load emergency information. Please check your connection.');
       } finally {
         setLoading(false);
       }

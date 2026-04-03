@@ -5,7 +5,7 @@ import { QRCodeSVG } from 'qrcode.react';
 import { useAuth } from '../App';
 import { db, auth } from '../firebase';
 import { UserProfile, EmergencyProfile } from '../types';
-import { Shield, QrCode, User, Heart, PhoneCall, LogOut, Edit3, Share2, Download, Settings } from 'lucide-react';
+import { Shield, QrCode, User, Heart, PhoneCall, LogOut, Edit3, Share2, Download, Settings, MapPin, Copy, Check } from 'lucide-react';
 import { motion } from 'motion/react';
 
 export default function Dashboard() {
@@ -14,6 +14,14 @@ export default function Dashboard() {
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [emergencyProfile, setEmergencyProfile] = useState<EmergencyProfile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [copied, setCopied] = useState(false);
+
+  const handleCopyLink = () => {
+    if (!emergencyUrl) return;
+    navigator.clipboard.writeText(emergencyUrl);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -38,7 +46,7 @@ export default function Dashboard() {
     navigate('/');
   };
 
-  const emergencyUrl = `${window.location.origin}/emergency/${user?.uid}`;
+  const emergencyUrl = user?.uid ? `${window.location.origin}/emergency/${user.uid}` : '';
 
   if (loading) return <div className="flex items-center justify-center h-screen">Loading...</div>;
 
@@ -83,13 +91,19 @@ export default function Dashboard() {
           <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-8 text-center">
             <h2 className="text-xl font-bold text-gray-900 mb-6">Your Emergency QR</h2>
             <div className="bg-gray-50 p-6 rounded-2xl border border-gray-100 inline-block mb-6 shadow-inner">
-              <QRCodeSVG 
-                value={emergencyUrl} 
-                size={200} 
-                level="H"
-                includeMargin={true}
-                className="w-full h-full"
-              />
+              {emergencyUrl ? (
+                <QRCodeSVG 
+                  value={emergencyUrl} 
+                  size={200} 
+                  level="H"
+                  includeMargin={true}
+                  className="w-full h-full"
+                />
+              ) : (
+                <div className="w-[200px] h-[200px] flex items-center justify-center text-gray-400">
+                  Generating...
+                </div>
+              )}
             </div>
             <p className="text-sm text-gray-500 mb-8">
               This code links directly to your public emergency profile. 
@@ -99,8 +113,12 @@ export default function Dashboard() {
               <button className="w-full py-3 px-4 bg-red-600 text-white rounded-xl font-medium hover:bg-red-700 transition-colors flex items-center justify-center gap-2">
                 <Download className="w-4 h-4" /> Download QR Code
               </button>
-              <button className="w-full py-3 px-4 bg-gray-100 text-gray-900 rounded-xl font-medium hover:bg-gray-200 transition-colors flex items-center justify-center gap-2">
-                <Share2 className="w-4 h-4" /> Share Profile Link
+              <button 
+                onClick={handleCopyLink}
+                className="w-full py-3 px-4 bg-gray-100 text-gray-900 rounded-xl font-medium hover:bg-gray-200 transition-colors flex items-center justify-center gap-2"
+              >
+                {copied ? <Check className="w-4 h-4 text-green-600" /> : <Copy className="w-4 h-4" />}
+                {copied ? 'Copied!' : 'Copy Profile Link'}
               </button>
             </div>
           </div>
@@ -202,25 +220,74 @@ export default function Dashboard() {
           </div>
 
           <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-8">
-            <h2 className="text-xl font-bold text-gray-900 mb-6">Personal Information</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">Full Name</label>
-                <div className="mt-1 text-gray-900 font-medium">{userProfile?.fullName || user?.displayName}</div>
-              </div>
-              <div>
-                <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">Email Address</label>
-                <div className="mt-1 text-gray-900 font-medium">{userProfile?.email || user?.email}</div>
-              </div>
-              <div>
-                <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">Phone Number</label>
-                <div className="mt-1 text-gray-900 font-medium">{userProfile?.phone || <span className="text-gray-400 italic">Not provided</span>}</div>
-              </div>
-              <div>
-                <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">Insurance</label>
-                <div className="mt-1 text-gray-900 font-medium">
-                  {userProfile?.insuranceProvider ? `${userProfile.insuranceProvider} (${userProfile.insurancePolicyNumber})` : <span className="text-gray-400 italic">Not provided</span>}
+            <div className="flex items-center justify-between mb-8">
+              <h2 className="text-xl font-bold text-gray-900">Personal Information</h2>
+              <Link to="/profile" className="p-2 text-gray-400 hover:text-red-600 transition-colors">
+                <Settings className="w-5 h-5" />
+              </Link>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-8">
+              <div className="space-y-6">
+                <div className="flex items-start gap-4">
+                  <div className="w-10 h-10 bg-gray-50 rounded-xl flex items-center justify-center shrink-0 border border-gray-100">
+                    <User className="w-5 h-5 text-gray-400" />
+                  </div>
+                  <div>
+                    <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest block mb-1">Full Name</label>
+                    <div className="text-gray-900 font-bold">{userProfile?.fullName || user?.displayName || 'Not set'}</div>
+                  </div>
                 </div>
+
+                <div className="flex items-start gap-4">
+                  <div className="w-10 h-10 bg-gray-50 rounded-xl flex items-center justify-center shrink-0 border border-gray-100">
+                    <PhoneCall className="w-5 h-5 text-gray-400" />
+                  </div>
+                  <div>
+                    <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest block mb-1">Phone Number</label>
+                    <div className="text-gray-900 font-bold">{userProfile?.phone || <span className="text-gray-400 italic font-normal">Not provided</span>}</div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-6">
+                <div className="flex items-start gap-4">
+                  <div className="w-10 h-10 bg-gray-50 rounded-xl flex items-center justify-center shrink-0 border border-gray-100">
+                    <Shield className="w-5 h-5 text-gray-400" />
+                  </div>
+                  <div>
+                    <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest block mb-1">Insurance Details</label>
+                    <div className="text-gray-900 font-bold">
+                      {userProfile?.insuranceProvider ? (
+                        <>
+                          <div className="text-gray-900">{userProfile.insuranceProvider}</div>
+                          <div className="text-xs text-gray-500 font-medium">Policy: {userProfile.insurancePolicyNumber}</div>
+                        </>
+                      ) : (
+                        <span className="text-gray-400 italic font-normal">Not provided</span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-4">
+                  <div className="w-10 h-10 bg-gray-50 rounded-xl flex items-center justify-center shrink-0 border border-gray-100">
+                    <MapPin className="w-5 h-5 text-gray-400" />
+                  </div>
+                  <div>
+                    <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest block mb-1">Home Address</label>
+                    <div className="text-gray-900 font-bold leading-tight">
+                      {userProfile?.address || <span className="text-gray-400 italic font-normal">Not provided</span>}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div className="mt-8 pt-8 border-t border-gray-50">
+              <div className="flex items-center gap-3 text-sm text-gray-500">
+                <div className="w-2 h-2 rounded-full bg-green-500"></div>
+                Account Email: <span className="font-bold text-gray-700">{userProfile?.email || user?.email}</span>
               </div>
             </div>
           </div>
