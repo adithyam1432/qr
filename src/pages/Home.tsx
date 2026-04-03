@@ -44,7 +44,10 @@ export default function Home() {
             >
               Create Your Profile <ArrowRight className="w-5 h-5" />
             </Link>
-            <button className="w-full sm:w-auto px-8 py-4 text-lg font-medium text-gray-900 bg-gray-100 rounded-xl hover:bg-gray-200 transition-all">
+            <button 
+              onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })}
+              className="w-full sm:w-auto px-8 py-4 text-lg font-medium text-gray-900 bg-gray-100 rounded-xl hover:bg-gray-200 transition-all"
+            >
               Learn How It Works
             </button>
           </div>
@@ -80,7 +83,7 @@ export default function Home() {
       </section>
 
       {/* Features */}
-      <section className="bg-gray-50 py-24 px-6">
+      <section id="features" className="bg-gray-50 py-24 px-6">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-3xl font-bold text-gray-900 mb-4">Why Choose MediQR?</h2>
