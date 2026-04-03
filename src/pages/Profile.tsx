@@ -124,6 +124,8 @@ export default function Profile() {
 
       const emergencyProfileData = {
         uid: user.uid,
+        fullName,
+        email: user.email || '',
         bloodType,
         allergies,
         medications,

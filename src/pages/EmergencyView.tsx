@@ -22,16 +22,26 @@ export default function EmergencyView() {
     const fetchData = async () => {
       if (!uid) return;
       try {
-        const userDoc = await getDoc(doc(db, 'users', uid));
+        // Fetch emergency profile first (publicly readable)
         const emergencyDoc = await getDoc(doc(db, 'emergency_profiles', uid));
         
-        if (userDoc.exists()) setUserProfile(userDoc.data() as UserProfile);
         if (emergencyDoc.exists()) {
           const data = emergencyDoc.data() as EmergencyProfile;
           if (data.isPublic === false) {
             setIsPrivate(true);
           } else {
             setEmergencyProfile(data);
+            
+            // Try to fetch full user profile (might fail if not owner/admin)
+            try {
+              const userDoc = await getDoc(doc(db, 'users', uid));
+              if (userDoc.exists()) {
+                setUserProfile(userDoc.data() as UserProfile);
+              }
+            } catch (userErr) {
+              // Silently fail for user profile as it's restricted
+              console.log('User profile restricted, using emergency profile data');
+            }
           }
         } else {
           setError('Emergency profile not found. The user may not have completed their profile setup.');
@@ -105,7 +115,7 @@ export default function EmergencyView() {
                 <Settings className="w-4 h-4" /> <span className="hidden sm:inline">Admin</span>
               </button>
             )}
-            {(user?.uid === uid || isAdmin) && (
+            {user?.uid === uid && (
               <button
                 onClick={() => navigate('/dashboard')}
                 className="p-2 bg-white/10 hover:bg-white/20 rounded-xl transition-all flex items-center gap-2 text-xs font-bold"
@@ -140,7 +150,9 @@ export default function EmergencyView() {
               <User className="w-8 h-8 text-gray-400" />
             </div>
             <div>
-              <h2 className="text-2xl font-black text-gray-900 dark:text-white leading-tight">{userProfile?.fullName || 'Unknown Patient'}</h2>
+              <h2 className="text-2xl font-black text-gray-900 dark:text-white leading-tight">
+                {userProfile?.fullName || emergencyProfile?.fullName || 'Unknown Patient'}
+              </h2>
               <p className="text-gray-500 dark:text-gray-400 font-medium">Patient Profile</p>
             </div>
           </div>
@@ -264,7 +276,7 @@ export default function EmergencyView() {
                 <Shield className="w-3 h-3" /> Insurance
               </h4>
               <p className="font-bold text-gray-800 dark:text-gray-200">
-                {userProfile?.insuranceProvider ? `${userProfile.insuranceProvider}` : 'Not provided'}
+                {userProfile?.insuranceProvider ? `${userProfile.insuranceProvider}` : 'Restricted or Not provided'}
               </p>
               {userProfile?.insurancePolicyNumber && (
                 <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">Policy: {userProfile.insurancePolicyNumber}</p>
@@ -275,7 +287,7 @@ export default function EmergencyView() {
                 <MapPin className="w-3 h-3" /> Home Address
               </h4>
               <p className="font-bold text-gray-800 dark:text-gray-200 leading-tight">
-                {userProfile?.address || 'Not provided'}
+                {userProfile?.address || 'Restricted or Not provided'}
               </p>
             </div>
           </div>

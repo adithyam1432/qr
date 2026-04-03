@@ -18,6 +18,8 @@ export interface EmergencyContact {
 
 export interface EmergencyProfile {
   uid: string;
+  fullName: string;
+  email: string;
   bloodType: 'A+' | 'A-' | 'B+' | 'B-' | 'AB+' | 'AB-' | 'O+' | 'O-' | 'Unknown';
   allergies: string[];
   medications: string[];
