@@ -3,14 +3,15 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { doc, getDoc } from 'firebase/firestore';
 import { db, handleFirestoreError, OperationType } from '../firebase';
 import { UserProfile, EmergencyProfile } from '../types';
-import { Shield, Heart, PhoneCall, AlertTriangle, AlertCircle, Activity, User, Info, MapPin, Lock, ArrowLeft, Sun, Moon } from 'lucide-react';
+import { Shield, Heart, PhoneCall, AlertTriangle, AlertCircle, Activity, User, Info, MapPin, Lock, ArrowLeft, Sun, Moon, LayoutDashboard, Settings } from 'lucide-react';
 import { motion } from 'motion/react';
-import { useTheme } from '../App';
+import { useTheme, useAuth } from '../App';
 
 export default function EmergencyView() {
   const { uid } = useParams<{ uid: string }>();
   const navigate = useNavigate();
   const { isDarkMode, toggleTheme } = useTheme();
+  const { user, isAdmin } = useAuth();
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [emergencyProfile, setEmergencyProfile] = useState<EmergencyProfile | null>(null);
   const [loading, setLoading] = useState(true);
@@ -94,7 +95,25 @@ export default function EmergencyView() {
               <p className="text-xs opacity-80 font-bold mt-1">CRITICAL MEDICAL DATA</p>
             </div>
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 md:gap-4">
+            {isAdmin && (
+              <button
+                onClick={() => navigate('/admin')}
+                className="p-2 bg-white/10 hover:bg-white/20 rounded-xl transition-all flex items-center gap-2 text-xs font-bold"
+                title="Admin Dashboard"
+              >
+                <Settings className="w-4 h-4" /> <span className="hidden sm:inline">Admin</span>
+              </button>
+            )}
+            {(user?.uid === uid || isAdmin) && (
+              <button
+                onClick={() => navigate('/dashboard')}
+                className="p-2 bg-white/10 hover:bg-white/20 rounded-xl transition-all flex items-center gap-2 text-xs font-bold"
+                title="Your Dashboard"
+              >
+                <LayoutDashboard className="w-4 h-4" /> <span className="hidden sm:inline">Dashboard</span>
+              </button>
+            )}
             <button
               onClick={toggleTheme}
               className="p-2 bg-white/10 hover:bg-white/20 rounded-xl transition-all"

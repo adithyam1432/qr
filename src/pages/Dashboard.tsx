@@ -171,6 +171,31 @@ export default function Dashboard() {
           </motion.div>
         )}
 
+        {/* Profile Completion Warning */}
+        {!emergencyProfile && !loading && (
+          <motion.div 
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-8 p-6 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-[32px] flex flex-col md:flex-row items-center justify-between gap-6"
+          >
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 bg-amber-100 dark:bg-amber-900/40 rounded-2xl flex items-center justify-center text-amber-600">
+                <AlertCircle className="w-6 h-6" />
+              </div>
+              <div>
+                <h3 className="text-lg font-black text-amber-900 dark:text-amber-100 uppercase tracking-tight">Complete Your Profile</h3>
+                <p className="text-amber-700/80 dark:text-amber-300/80 font-medium">Your emergency QR code won't work until you provide your medical information.</p>
+              </div>
+            </div>
+            <Link 
+              to="/profile" 
+              className="px-8 py-4 bg-amber-600 text-white rounded-2xl font-black hover:bg-amber-700 transition-all uppercase tracking-widest text-xs shadow-lg shadow-amber-100 dark:shadow-none"
+            >
+              Setup Profile Now
+            </Link>
+          </motion.div>
+        )}
+
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           {/* Left Column: QR Code */}
           <motion.div 
@@ -188,7 +213,7 @@ export default function Dashboard() {
                     size={220} 
                     level="H"
                     includeMargin={true}
-                    className="w-full h-full group-hover:scale-105 transition-transform dark:invert dark:hue-rotate-180"
+                    className="w-full h-full group-hover:scale-105 transition-transform"
                   />
                 ) : (
                   <div className="w-[220px] h-[220px] flex items-center justify-center text-gray-400">
@@ -228,7 +253,7 @@ export default function Dashboard() {
                       value={emergencyUrl} 
                       size={120} 
                       level="M"
-                      className="dark:invert dark:hue-rotate-180"
+                      className=""
                     />
                   </div>
                 </div>
@@ -445,7 +470,7 @@ export default function Dashboard() {
                       level="H"
                       includeMargin={true}
                       style={{ width: '240px', height: '240px' }}
-                      className="group-hover:scale-105 transition-transform dark:invert dark:hue-rotate-180"
+                      className="group-hover:scale-105 transition-transform"
                     />
                   ) : (
                     <QRCodeSVG
@@ -455,7 +480,7 @@ export default function Dashboard() {
                       level="H"
                       includeMargin={true}
                       style={{ width: '240px', height: '240px' }}
-                      className="group-hover:scale-105 transition-transform dark:invert dark:hue-rotate-180"
+                      className="group-hover:scale-105 transition-transform"
                     />
                   )}
                 </div>

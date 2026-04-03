@@ -88,12 +88,12 @@ export default function Home() {
             </motion.div>
 
             <motion.div 
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 0.85 }}
               transition={{ delay: 0.2, duration: 0.6 }}
               className="relative"
             >
-              <div className="relative z-10 bg-white dark:bg-gray-900 p-4 rounded-[40px] shadow-[0_32px_64px_-12px_rgba(0,0,0,0.1)] dark:shadow-none border border-gray-100 dark:border-gray-800">
+              <div className="relative z-10 bg-white dark:bg-gray-900 p-4 rounded-[40px] shadow-[0_50px_100px_-20px_rgba(0,0,0,0.3)] dark:shadow-none border border-gray-100 dark:border-gray-800">
                 <div className="bg-gray-50 dark:bg-gray-800 rounded-[32px] overflow-hidden p-8">
                   <div className="flex items-center justify-between mb-12">
                     <div className="flex items-center gap-3">
